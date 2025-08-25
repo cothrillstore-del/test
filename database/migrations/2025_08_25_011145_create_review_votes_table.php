@@ -8,22 +8,21 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('review_media', function (Blueprint $table) {
+        Schema::create('review_votes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('review_id')->constrained()->onDelete('cascade');
-            $table->enum('media_type', ['image', 'video']);
-            $table->string('media_url');
-            $table->string('thumbnail_url')->nullable();
-            $table->string('caption')->nullable();
-            $table->integer('sort_order')->default(0);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('vote_type', ['helpful', 'unhelpful']);
             $table->timestamps();
             
+            $table->unique(['review_id', 'user_id']);
             $table->index('review_id');
+            $table->index('user_id');
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('review_media');
+        Schema::dropIfExists('review_votes');
     }
 };

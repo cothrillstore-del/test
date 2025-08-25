@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ArticleManagementController;
 use App\Http\Controllers\Admin\BrandManagementController;
 use App\Http\Controllers\Admin\CategoryManagementController;
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -36,7 +37,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Đã login
     Route::middleware(['auth'])->group(function () {   // ⟵ bỏ admin.auth ở đây
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+        // Dashboard routes
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/dashboard/analytics', [DashboardController::class, 'getAnalyticsData'])->name('dashboard.analytics');
+        Route::get('/dashboard/export', [DashboardController::class, 'exportReport'])->name('dashboard.export');
 
         // Chỉ Admin
         Route::middleware('admin.auth:admin')->group(function () {
@@ -78,6 +83,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/{category}/toggle-active', [CategoryManagementController::class, 'toggleActive'])->name('toggle-active');
                 Route::post('/update-order', [CategoryManagementController::class, 'updateOrder'])->name('update-order');
             });
+        });
+
+        // Reviews Management
+        Route::prefix('reviews')->name('reviews.')->group(function () {
+            Route::get('/', [ReviewModerationController::class, 'index'])->name('index');
+            Route::get('/statistics', [ReviewModerationController::class, 'statistics'])->name('statistics');
+            Route::get('/export', [ReviewModerationController::class, 'export'])->name('export');
+            Route::get('/{review}', [ReviewModerationController::class, 'show'])->name('show');
+            Route::get('/{review}/edit', [ReviewModerationController::class, 'edit'])->name('edit');
+            Route::put('/{review}', [ReviewModerationController::class, 'update'])->name('update');
+            Route::delete('/{review}', [ReviewModerationController::class, 'destroy'])->name('destroy');
+            
+            // Moderation actions
+            Route::post('/{review}/approve', [ReviewModerationController::class, 'approve'])->name('approve');
+            Route::post('/{review}/reject', [ReviewModerationController::class, 'reject'])->name('reject');
+            Route::post('/{review}/flag', [ReviewModerationController::class, 'flag'])->name('flag');
+            Route::post('/{review}/toggle-featured', [ReviewModerationController::class, 'toggleFeatured'])->name('toggle-featured');
+            
+            // Bulk actions
+            Route::post('/bulk-approve', [ReviewModerationController::class, 'bulkApprove'])->name('bulk-approve');
+            Route::post('/bulk-reject', [ReviewModerationController::class, 'bulkReject'])->name('bulk-reject');
         });
 
         // Tất cả user backend
